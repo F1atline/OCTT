@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Swagger UI with Logs</title>
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist/swagger-ui.css">
+        <style>
+            #logs {
+                border: 1px solid rgba(59,65,81,.3);
+                height: 300px;
+                overflow-y: scroll;
+                border-radius: 4px;
+            }
+            .curl-command {
+            display: none;
+            }
+            .request-url {
+            display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="swagger-ui"></div>
+        <div class="swagger-ui">
+            <div>
+                <div class="wrapper swagger-ui">
+                    <section class="block col-12 block-desktop col-12-desktop">
+                        <div class="opblock-tag-section is-open">
+                            <h2 class="swagger-ui opblock-tag no-desc">OCPP Logs</h2>
+                            <div id="logs" class="swagger-ui operation-tag-content"></div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist/swagger-ui-bundle.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist/swagger-ui-standalone-preset.js"></script>
+        <script>
+            window.onload = function() {
+                const ui = SwaggerUIBundle({
+                    url: "/openapi.json",
+                    dom_id: '#swagger-ui',
+                    presets: [
+                        SwaggerUIBundle.presets.apis,
+                        SwaggerUIStandalonePreset
+                    ],
+                    layout: "BaseLayout"
+                });
+
+                var ws = new WebSocket("ws://localhost:8000/ws");
+                ws.onopen = function() {
+                    console.log("WebSocket connection opened");
+                };
+                ws.onmessage = function(event) {
+                    console.log("Received message:", event.data);
+                    var logsDiv = document.getElementById('logs');
+                    var messageElem = document.createElement('div');
+                    messageElem.textContent = event.data;
+                    logsDiv.appendChild(messageElem);
+                    logsDiv.scrollTop = logsDiv.scrollHeight;
+                };
+                ws.onerror = function(error) {
+                    console.error("WebSocket error:", error);
+                };
+            }
+        </script>
+    </body>
+</html>
