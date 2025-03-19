@@ -1,3 +1,4 @@
+import os
 import json
 import asyncio
 import logging
@@ -21,6 +22,18 @@ from ocpp.v16.datatypes import IdTagInfo
 from loguru import logger
 
 from typing import Annotated
+
+def load_settings(file_path):
+    if not os.path.exists(file_path):
+        logger.error(f"Settings file {file_path} not found.")
+        return {}
+
+    with open(file_path, 'r') as file:
+        settings = json.load(file)
+    return settings
+
+settings_file = 'settings.json'
+settings = load_settings(settings_file)
 
 logging.getLogger('ocpp').setLevel(level=logging.INFO)
 
@@ -90,15 +103,15 @@ app.openapi = custom_openapi
 
 # only Swagger UI
 docs_html = ""
-with open("./ocpp/docs.html") as f:
+with open("./docs.html") as f:
     docs_html = f.read()
 # only logs
 logs_html = ""
-with open("./ocpp/logs.html") as f:
+with open("./logs.html") as f:
     logs_html = f.read()
 # logs and Swagger UI
 docslogs_html = ""
-with open("./ocpp/docslogs.html") as f:
+with open("./docslogs.html") as f:
     docslogs_html = f.read()
 
 @app.get("/docs", include_in_schema=False)
@@ -376,10 +389,10 @@ async def on_connect(websocket):
 
 async def main():
     server = await websockets.serve(
-        on_connect, "192.168.88.100", 9000, subprotocols=["ocpp1.6"]
+        on_connect, settings.get("OCPP", {}).get("ip"), settings.get("OCPP", {}).get("port"), subprotocols=["ocpp1.6"]
     )
     logger.info("Server Started listening to new connections...")
-    await asyncio.gather(server.wait_closed(), uvicorn.Server(uvicorn.Config(app, host="0.0.0.0", port=8000)).serve())
+    await asyncio.gather(server.wait_closed(), uvicorn.Server(uvicorn.Config(app, host=settings.get("CSMS", {}).get("ip"), port=settings.get("CSMS", {}).get("port"))).serve())
 
 if __name__ == "__main__":
     asyncio.run(main())

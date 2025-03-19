@@ -1,0 +1,5 @@
+websockets==14.1
+ocpp==1.0.0
+fastapi==0.115.11
+loguru==0.7.2
+uvicorn==0.34.0
