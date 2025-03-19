@@ -26,7 +26,7 @@ logging.getLogger('ocpp').addHandler(logging.StreamHandler())
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
-load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 BOOTNOTIFICATION_TIMEOUT = 60
 MAX_RETRY_ATTEMPTS = 3
@@ -121,8 +121,6 @@ class Client(cp):
             response = await self.call(request)
             logger.debug(response)
             await asyncio.sleep(self.heart_beat_interval)
-
-
 
 async def main():
     logger.debug("START OCPP Client")
